@@ -60,20 +60,23 @@ class STTBenchmark:
             reference = self.normalizer.normalize_transcript(reference)
             hypothesis = self.normalizer.normalize_transcript(hypothesis)
 
-        # Match speakers if enabled
-        if self.match_speakers:
-            hypothesis = self.speaker_matcher.match_and_align(reference, hypothesis)
-
         # Calculate metrics
         results = {}
+
+        # CP-WER should be calculated on UNMATCHED speakers
+        # (it finds optimal permutation itself)
+        if calculate_cp_wer:
+            cp_wer_results = CPWERMetrics.calculate(reference, hypothesis)
+            results.update(cp_wer_results)
+
+        # Match speakers for WER and DER calculations
+        # (these metrics need aligned speaker labels)
+        if self.match_speakers and (calculate_wer or calculate_der):
+            hypothesis = self.speaker_matcher.match_and_align(reference, hypothesis)
 
         if calculate_wer:
             wer_results = WERMetrics.calculate(reference, hypothesis)
             results.update(wer_results)
-
-        if calculate_cp_wer:
-            cp_wer_results = CPWERMetrics.calculate(reference, hypothesis)
-            results.update(cp_wer_results)
 
         if calculate_der:
             try:
