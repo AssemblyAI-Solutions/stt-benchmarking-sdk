@@ -24,22 +24,22 @@ class WERMetrics:
         ref_text = reference.get_all_text()
         hyp_text = hypothesis.get_all_text()
 
-        # Calculate all measures at once
-        measures = jiwer.compute_measures(ref_text, hyp_text)
+        # Calculate all measures using process_words
+        output = jiwer.process_words(ref_text, hyp_text)
 
         # Count speakers
         ref_speakers = len(reference.get_speakers())
         hyp_speakers = len(hypothesis.get_speakers())
 
         return {
-            "wer": measures["wer"],
-            "mer": measures["mer"],
-            "wil": measures["wil"],
-            "wip": measures["wip"],
-            "hits": measures["hits"],
-            "substitutions": measures["substitutions"],
-            "deletions": measures["deletions"],
-            "insertions": measures["insertions"],
+            "wer": output.wer,
+            "mer": output.mer,
+            "wil": output.wil,
+            "wip": output.wip,
+            "hits": output.hits,
+            "substitutions": output.substitutions,
+            "deletions": output.deletions,
+            "insertions": output.insertions,
             "ref_num_speakers": ref_speakers,
             "hyp_num_speakers": hyp_speakers,
             "speaker_count_correct": 1 if ref_speakers == hyp_speakers else 0,
@@ -351,8 +351,8 @@ class DERMetrics:
         metric = DiarizationErrorRate()
         der_value = metric(ref_annotation, hyp_annotation)
 
-        # Get detailed components
-        components = metric.components(ref_annotation, hyp_annotation)
+        # Get detailed components via the detailed output
+        detail = metric.compute_components(ref_annotation, hyp_annotation)
 
         # Count speakers
         ref_speakers = len(reference.get_speakers())
@@ -360,10 +360,10 @@ class DERMetrics:
 
         return {
             "der": der_value,
-            "false_alarm": components.get("false alarm", 0.0),
-            "missed_detection": components.get("missed detection", 0.0),
-            "confusion": components.get("confusion", 0.0),
-            "total": components.get("total", 0.0),
+            "false_alarm": detail.get("false alarm", 0.0),
+            "missed_detection": detail.get("missed detection", 0.0),
+            "confusion": detail.get("confusion", 0.0),
+            "total": detail.get("total", 0.0),
             "ref_num_speakers": ref_speakers,
             "hyp_num_speakers": hyp_speakers,
             "speaker_count_correct": 1 if ref_speakers == hyp_speakers else 0,
