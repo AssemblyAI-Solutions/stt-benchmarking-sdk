@@ -10,6 +10,9 @@ A comprehensive Python SDK for benchmarking Speech-to-Text systems with quantita
 - **Speaker Metrics**: Track speaker count accuracy and identification performance
 - **Automatic Normalization**: Text normalization using Whisper's normalizer
 - **Speaker Matching**: Fuzzy matching to align different speaker label conventions
+- **Semantic WER**: Word list normalization to stop penalizing equivalent forms ("alright" = "all right")
+- **Missed Entity Rate**: Measure whether critical entities (drug names, conditions) are preserved in transcription
+- **Transcription**: Transcribe audio via AssemblyAI or OpenAI Whisper for provider comparison
 - **LLM Vibe Eval**: Qualitative evaluation using state-of-the-art LLMs (Claude, GPT, Gemini)
 - **Batch Processing**: Evaluate multiple files and vendors efficiently
 - **CSV Export**: Export detailed and summary results for analysis
@@ -135,6 +138,52 @@ vendor_c,0.0267,0.0289,0.62,50
 
 See **[SPEAKER_METRICS_GUIDE.md](SPEAKER_METRICS_GUIDE.md)** for details.
 
+### Semantic WER
+
+Traditional WER penalizes semantically equivalent differences like "health care" vs "healthcare". Semantic WER normalizes these before comparison:
+
+```python
+from stt_benchmarking import SemanticWERMetrics
+
+result = SemanticWERMetrics.calculate(
+    reference_text="The patient needs health care.",
+    hypothesis_text="The patient needs healthcare.",
+    semantic_word_list=[["health care", "healthcare"]],
+)
+print(f"WER: {result['wer']:.2%}")  # 0.00%
+```
+
+Configure equivalences in `data/semantic_word_list.json` or pass them directly.
+
+### Missed Entity Rate
+
+Measures whether critical named entities are preserved in transcription. Uses AssemblyAI's LLM Gateway for entity extraction:
+
+```python
+from stt_benchmarking import MissedEntityRate
+
+mer = MissedEntityRate()
+result = mer.calculate(
+    reference_text="Medications include metformin and atorvastatin.",
+    hypothesis_text="Medications include metformin and a statin.",
+)
+print(f"Missed: {result['missed_entity_rate']:.2%}")
+for e in result["missed_entities"]:
+    print(f"  - {e['entity']} ({e['type']})")
+```
+
+### Transcription (AssemblyAI + Whisper)
+
+Transcribe audio files with AssemblyAI or OpenAI Whisper for provider comparison:
+
+```python
+from stt_benchmarking import Transcriber
+
+transcriber = Transcriber()
+aai_text = transcriber.transcribe("audio.mp3", provider="assemblyai")
+oai_text = transcriber.transcribe("audio.mp3", provider="openai")
+```
+
 ### LLM Vibe Eval (Qualitative Assessment)
 
 Get AI-powered qualitative feedback on transcription quality:
@@ -219,6 +268,18 @@ WER = (Substitutions + Deletions + Insertions) / Total Words
 - **Acceptable:** 5-10%
 - **Needs improvement:** > 10%
 
+### Semantic WER
+
+Same formula as WER, but normalizes semantically equivalent word forms first. "alright" and "all right" are treated as identical. Configure equivalences via a JSON word list.
+
+### Missed Entity Rate
+
+What percentage of important entities in the ground truth are absent from the prediction. A 5% WER might sound great, but if that 5% includes "metformin" and "hypertension", it matters a lot more than missing a filler word.
+
+```
+Missed Entity Rate = (Missed Entities) / (Total Reference Entities)
+```
+
 ### CP-WER (Concatenated minimum-Permutation WER)
 
 Specialized metric for multi-speaker transcription. Accounts for both transcription accuracy and speaker separation.
@@ -263,9 +324,9 @@ print(f"Speaker ID Accuracy: {stats['speaker_count_correct']['mean']:.1%}")
 
 ## Examples
 
-The `examples/` directory contains 8 comprehensive examples:
+The `examples/` directory contains comprehensive examples:
 
-- **`basic_usage.py`** - Simple evaluation scenarios
+- **`basic_usage.py`** - Simple WER/CP-WER/DER evaluation
 - **`advanced_usage.py`** - Custom configurations and batch processing
 - **`batch_processing.py`** - Process multiple files efficiently
 - **`csv_export_example.py`** - CSV export and analysis
@@ -273,6 +334,10 @@ The `examples/` directory contains 8 comprehensive examples:
 - **`llm_vibe_eval_example.py`** - Qualitative LLM evaluation
 - **`complete_workflow_with_llm.py`** - Full workflow with quantitative + qualitative metrics
 - **`normalization_demo.py`** - Text normalization examples
+- **`semantic_wer_example.py`** - Semantic WER with word list normalization (no API key needed)
+- **`missed_entity_rate_example.py`** - Medical entity miss rate detection
+- **`whisper_comparison_example.py`** - AssemblyAI vs Whisper side-by-side comparison
+- **`full_benchmark_example.py`** - All tools combined with CSV export
 
 Run any example:
 ```bash
@@ -345,6 +410,47 @@ evaluator = LLMEvaluator(
 **Methods:**
 - `evaluate_and_score(reference, hypothesis, vendor_name, file_identifier)` - Get vibe score + feedback
 - `evaluate_single(reference, hypothesis, vendor_name, file_identifier)` - Get individual model evaluations
+
+### SemanticWERMetrics
+
+Semantic word error rate:
+
+```python
+from stt_benchmarking import SemanticWERMetrics
+
+result = SemanticWERMetrics.calculate(
+    reference_text,
+    hypothesis_text,
+    semantic_word_list_path="data/semantic_word_list.json",  # or pass semantic_word_list directly
+)
+```
+
+### MissedEntityRate
+
+Entity extraction and miss rate:
+
+```python
+from stt_benchmarking import MissedEntityRate
+
+mer = MissedEntityRate(api_key=None)  # defaults to ASSEMBLYAI_API_KEY env var
+result = mer.calculate(reference_text, hypothesis_text)
+entities = mer.extract_entities(text)  # extract entities from any text
+```
+
+### Transcriber
+
+Dual-provider audio transcription:
+
+```python
+from stt_benchmarking import Transcriber
+
+transcriber = Transcriber(
+    assemblyai_api_key=None,  # defaults to ASSEMBLYAI_API_KEY env var
+    openai_api_key=None,      # defaults to OPENAI_API_KEY env var
+    assemblyai_config=None,   # defaults to universal-3-pro
+)
+text = transcriber.transcribe("audio.mp3", provider="assemblyai")  # or "openai"
+```
 
 ### Utility Functions
 
