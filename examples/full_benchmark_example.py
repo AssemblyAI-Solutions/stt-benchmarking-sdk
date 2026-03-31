@@ -17,10 +17,12 @@ Requires audio files in data/audio/ with matching truth files in data/truth/.
 import csv
 from pathlib import Path
 from stt_benchmarking import (
+    Transcript,
     Transcriber,
     SemanticWERMetrics,
     MissedEntityRate,
     LLMEvaluator,
+    LLMResultsExporter,
     load_semantic_word_list,
 )
 
@@ -64,8 +66,8 @@ def run_full_benchmark(
     # 4. LLM Evaluation
     print(f"\n[4/4] Running LLM Evaluation...")
     llm_result = llm_eval.evaluate_and_score(
-        reference=[{"speaker": "truth", "text": truth}],
-        hypothesis=[{"speaker": "prediction", "text": prediction}],
+        reference=Transcript.from_list([{"speaker": "truth", "text": truth}]),
+        hypothesis=Transcript.from_list([{"speaker": "prediction", "text": prediction}]),
         vendor_name="AssemblyAI",
         file_identifier=file_name,
     )
@@ -80,10 +82,23 @@ def run_full_benchmark(
         "insertions": wer_result["insertions"],
         "deletions": wer_result["deletions"],
         "substitutions": wer_result["substitutions"],
+        "hits": wer_result["hits"],
         "missed_entity_rate": entity_result["missed_entity_rate"],
         "total_entities": entity_result["total_entities"],
-        "missed_entities": len(entity_result["missed_entities"]),
+        "missed_entities_count": len(entity_result["missed_entities"]),
+        "missed_entities_list": ", ".join(
+            f"{e['entity']} ({e['type']})" for e in entity_result["missed_entities"]
+        ),
+        "found_entities_list": ", ".join(
+            f"{e['entity']} ({e['type']})" for e in entity_result["found_entities"]
+        ),
         "vibe_score": vibe_score,
+        "llm_consolidation": llm_result.get("consolidation", ""),
+        "truth_text": truth,
+        "prediction_text": prediction,
+        "truth_normalized": wer_result["reference_normalized"],
+        "prediction_normalized": wer_result["hypothesis_normalized"],
+        "_llm_result": llm_result,  # full LLM result for markdown export
     }
 
 
@@ -131,14 +146,28 @@ def main():
         print(f"\n  {r['file_name']}:")
         print(f"    WER: {r['wer']:.2%} | Missed Entities: {r['missed_entity_rate']:.2%} | Vibe: {r['vibe_score']}")
 
-    # Export CSV
+    # Export
     RESULTS_DIR.mkdir(exist_ok=True)
+
+    # CSV (exclude internal _llm_result field)
     csv_path = RESULTS_DIR / "full_benchmark.csv"
+    csv_fields = [k for k in results[0].keys() if not k.startswith("_")]
     with open(csv_path, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=list(results[0].keys()))
+        writer = csv.DictWriter(f, fieldnames=csv_fields, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(results)
-    print(f"\n  Results exported to {csv_path}")
+    print(f"\n  CSV exported to {csv_path}")
+
+    # Markdown files for LLM evaluations
+    for r in results:
+        md_path = RESULTS_DIR / f"{r['file_name']}_llm_eval.md"
+        LLMResultsExporter.to_markdown_file(
+            r["_llm_result"],
+            md_path,
+            vendor_name="AssemblyAI",
+            file_identifier=r["file_name"],
+        )
+        print(f"  LLM eval saved to {md_path}")
 
 
 if __name__ == "__main__":

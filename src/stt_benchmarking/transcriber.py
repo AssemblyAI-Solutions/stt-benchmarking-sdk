@@ -84,7 +84,7 @@ class Transcriber:
         transcript_id = resp.json()["id"]
 
         # Poll
-        print(f"  [AssemblyAI] Waiting (ID: {transcript_id})...")
+        poll_count = 0
         while True:
             resp = requests.get(
                 f"{self.ASSEMBLYAI_BASE_URL}/v2/transcript/{transcript_id}",
@@ -95,14 +95,16 @@ class Transcriber:
 
             if result["status"] == "completed":
                 text = result.get("text", "")
-                print(f"  [AssemblyAI] Done ({len(text.split())} words)")
+                print(f"\r  [AssemblyAI] Done ({len(text.split())} words)        ")
                 return text
             elif result["status"] == "error":
+                print()
                 raise RuntimeError(
                     f"Transcription failed: {result.get('error', 'Unknown error')}"
                 )
 
-            print(f"  [AssemblyAI] Status: {result['status']}...")
+            poll_count += 1
+            print(f"\r  [AssemblyAI] Processing{'.' * (poll_count % 4):4s}", end="", flush=True)
             time.sleep(3)
 
     def _transcribe_openai(self, audio_path: str) -> str:
