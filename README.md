@@ -45,7 +45,7 @@ cd stt-benchmarking-sdk
 pip install -e .
 ```
 
-**Note:** Virtual environments are recommended to avoid dependency conflicts. See **[VIRTUAL_ENV_GUIDE.md](VIRTUAL_ENV_GUIDE.md)** for detailed setup or **[VENV_AND_ENV_SUMMARY.md](VENV_AND_ENV_SUMMARY.md)** for a quick overview of how venv + .env work together.
+**Note:** Virtual environments are recommended to avoid dependency conflicts. See **[VIRTUAL_ENV_GUIDE.md](docs/VIRTUAL_ENV_GUIDE.md)** for detailed setup or **[VENV_AND_ENV_SUMMARY.md](docs/VENV_AND_ENV_SUMMARY.md)** for a quick overview of how venv + .env work together.
 
 ## Quick Start Options
 
@@ -53,7 +53,7 @@ pip install -e .
 
 **Best for:** Comparing multiple STT vendors across many audio files
 
-See **[GETTING_STARTED.md](GETTING_STARTED.md)** for the complete 5-step guide.
+See **[GETTING_STARTED.md](docs/GETTING_STARTED.md)** for the complete 5-step guide.
 
 **Quick version:**
 
@@ -136,7 +136,7 @@ vendor_c,0.0267,0.0289,0.62,50
 - `speaker_id_accuracy = 1.0` means vendor got speaker count right in 100% of files
 - `speaker_id_accuracy = 0.85` means vendor got speaker count right in 85% of files
 
-See **[SPEAKER_METRICS_GUIDE.md](SPEAKER_METRICS_GUIDE.md)** for details.
+See **[SPEAKER_METRICS_GUIDE.md](docs/SPEAKER_METRICS_GUIDE.md)** for details.
 
 ### Semantic WER
 
@@ -216,7 +216,7 @@ print(result['consolidation'])  # Detailed AI feedback
    ```
 3. The SDK will automatically load your API key from `.env`
 
-See **[LLM_VIBE_EVAL_GUIDE.md](LLM_VIBE_EVAL_GUIDE.md)** for complete documentation.
+See **[LLM_VIBE_EVAL_GUIDE.md](docs/LLM_VIBE_EVAL_GUIDE.md)** for complete documentation.
 
 ## Data Format
 
@@ -349,18 +349,18 @@ python examples/basic_usage.py
 Comprehensive guides available:
 
 ### Getting Started
-- **[GETTING_STARTED.md](GETTING_STARTED.md)** - Complete guide for benchmarking multiple vendors
-- **[QUICKSTART.md](QUICKSTART.md)** - Library usage quick reference
-- **[VIRTUAL_ENV_GUIDE.md](VIRTUAL_ENV_GUIDE.md)** - Virtual environment setup and best practices
+- **[GETTING_STARTED.md](docs/GETTING_STARTED.md)** - Complete guide for benchmarking multiple vendors
+- **[QUICKSTART.md](docs/QUICKSTART.md)** - Library usage quick reference
+- **[VIRTUAL_ENV_GUIDE.md](docs/VIRTUAL_ENV_GUIDE.md)** - Virtual environment setup and best practices
 
 ### Features
-- **[SPEAKER_METRICS_GUIDE.md](SPEAKER_METRICS_GUIDE.md)** - Speaker count tracking and accuracy
-- **[LLM_VIBE_EVAL_GUIDE.md](LLM_VIBE_EVAL_GUIDE.md)** - Qualitative evaluation with LLMs
-- **[CSV_EXPORT_GUIDE.md](CSV_EXPORT_GUIDE.md)** - CSV export patterns and best practices
+- **[SPEAKER_METRICS_GUIDE.md](docs/SPEAKER_METRICS_GUIDE.md)** - Speaker count tracking and accuracy
+- **[LLM_VIBE_EVAL_GUIDE.md](docs/LLM_VIBE_EVAL_GUIDE.md)** - Qualitative evaluation with LLMs
+- **[CSV_EXPORT_GUIDE.md](docs/CSV_EXPORT_GUIDE.md)** - CSV export patterns and best practices
 
 ### Configuration
-- **[ENV_SETUP.md](ENV_SETUP.md)** - Environment variables and API key setup
-- **[DIRECTORY_STRUCTURE.md](DIRECTORY_STRUCTURE.md)** - File organization options
+- **[ENV_SETUP.md](docs/ENV_SETUP.md)** - Environment variables and API key setup
+- **[DIRECTORY_STRUCTURE.md](docs/DIRECTORY_STRUCTURE.md)** - File organization options
 
 ## API Reference
 
