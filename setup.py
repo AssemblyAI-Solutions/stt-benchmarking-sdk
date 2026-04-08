@@ -19,6 +19,8 @@ setup(
         "scipy>=1.7.0",  # For optimal speaker mapping in DER
         "requests>=2.28.0",  # For LLM API calls
         "python-dotenv>=0.19.0",  # For environment configuration
+        "assemblyai>=0.59.0",  # For Streaming v3 SDK (universal-3 + universal-3-pro)
+        "webrtcvad",  # For VAD speech-end detection in turn detection benchmarks
     ],
     python_requires=">=3.8",
     classifiers=[

@@ -9,3 +9,5 @@ pyannote.core>=5.0.0
 scipy>=1.7.0
 requests>=2.28.0
 python-dotenv>=0.19.0
+assemblyai>=0.59.0
+webrtcvad
