@@ -12,6 +12,14 @@ from .semantic_normalizer import load_semantic_word_list, apply_semantic_replace
 from .semantic_wer import SemanticWERMetrics
 from .missed_entity_rate import MissedEntityRate
 from .transcriber import Transcriber
+from .turn_detection import (
+    TurnSample,
+    TurnDetectionResult,
+    AssemblyAIStreamingDetector,
+    TurnDetectionMetrics,
+    TurnDetectionBenchmark,
+    TurnDetectionExporter,
+)
 
 __version__ = "0.1.0"
 
@@ -37,4 +45,10 @@ __all__ = [
     "Transcriber",
     "load_semantic_word_list",
     "apply_semantic_replacements",
+    "TurnSample",
+    "TurnDetectionResult",
+    "AssemblyAIStreamingDetector",
+    "TurnDetectionMetrics",
+    "TurnDetectionBenchmark",
+    "TurnDetectionExporter",
 ]
